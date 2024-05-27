@@ -8,20 +8,15 @@ from PIL import Image
 from io import BytesIO
 import requests
 import ssl
-from urllib.request import urlopen, Request
-
-# Disable SSL certificate verification
-requests.packages.urllib3.disable_warnings()
-# Disable SSL certificate verification
-context = ssl.create_default_context()
-context.check_hostname = False
-context.verify_mode = ssl.CERT_NONE
 
 app = Flask(__name__)
 
 # Constants
 OCR_API_KEY = 'K83337641288957'
 OCR_API_URL = 'https://api.ocr.space/parse/image'
+
+# Disable SSL certificate verification
+requests.packages.urllib3.disable_warnings()
 
 def get_cookies(headers):
     headers = str(headers).split("\n")
@@ -38,9 +33,15 @@ def show_captcha():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/captchaDraw.png?" + str(ts), headers=headers)
-    res = url_request.urlopen(req, context=context, verify=False)
-    data = res.read()
-    cookies = get_cookies(res.headers)
+    
+    # Create a custom SSL context
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    
+    with url_request.urlopen(req, context=context) as res:
+        data = res.read()
+        cookies = get_cookies(res.headers)
     img = Image.open(BytesIO(data))
 
     # Call the OCR API
@@ -84,9 +85,16 @@ def get_train_details(train_number, src_long, dest_long, src, dest, date):
         "_": ts
     }
     data = parse.urlencode(data).encode()
-    req = url_request.Request("http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii'), headers=headers)
-    res = url_request.urlopen(req, context=context, verify=False)
-    trains = json.loads(res.read().decode('ascii'))
+    url = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii')
+    req = url_request.Request(url, headers=headers)
+    
+    # Create a custom SSL context
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    
+    with url_request.urlopen(req, context=context) as res:
+        trains = json.loads(res.read().decode('ascii'))
     
     for item in trains['trainBtwnStnsList']:
         if item['trainNumber'] == train_number and item['fromStnCode'] == src and item['toStnCode'] == dest:
@@ -120,10 +128,18 @@ def get_availability(train_number, src, dest, date, class1, train_type):
         "_": ts
     }
     data = parse.urlencode(data).encode()
-    req = url_request.Request("http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii'), headers=headers)
-    res = url_request.urlopen(req, context=context, verify=False)
-    d = res.read()
-    avail = json.loads(d.decode('utf8'))
+    url = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii')
+    req = url_request.Request(url, headers=headers)
+    
+    # Create a custom SSL context
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    
+    with url_request.urlopen(req, context=context) as res:
+        d = res.read()
+        avail = json.loads(d.decode('utf8'))
+    
     try:
         return avail['avlDayList'][0]['availablityStatus'], avail['totalCollectibleAmount']
     except:
@@ -143,8 +159,14 @@ def check_availability():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/FetchAutoComplete", headers=headers)
-    res = url_request.urlopen(req, context=context, verify=False)
-    stations = json.loads(res.read().decode('ascii'))
+    
+    # Create a custom SSL context
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    
+    with url_request.urlopen(req, context=context) as res:
+        stations = json.loads(res.read().decode('ascii'))
     
     src_long = next(item for item in stations if item.endswith(" " + src))
     dest_long = next(item for item in stations if item.endswith(" " + dest))
