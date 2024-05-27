@@ -8,6 +8,9 @@ from PIL import Image
 from io import BytesIO
 import requests
 
+# Disable SSL certificate verification
+requests.packages.urllib3.disable_warnings()
+
 app = Flask(__name__)
 
 # Constants
@@ -134,7 +137,7 @@ def check_availability():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/FetchAutoComplete", headers=headers)
-    res = url_request.urlopen(req)
+    res = url_request.urlopen(req,verify=False)
     stations = json.loads(res.read().decode('ascii'))
     
     src_long = next(item for item in stations if item.endswith(" " + src))
