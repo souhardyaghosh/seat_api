@@ -38,7 +38,7 @@ def show_captcha():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/captchaDraw.png?" + str(ts), headers=headers)
-    res = url_request.urlopen(req, context=context)
+    res = url_request.urlopen(req, context=context, verify=False)
     data = res.read()
     cookies = get_cookies(res.headers)
     img = Image.open(BytesIO(data))
@@ -85,7 +85,7 @@ def get_train_details(train_number, src_long, dest_long, src, dest, date):
     }
     data = parse.urlencode(data).encode()
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii'), headers=headers)
-    res = url_request.urlopen(req, context=context)
+    res = url_request.urlopen(req, context=context, verify=False)
     trains = json.loads(res.read().decode('ascii'))
     
     for item in trains['trainBtwnStnsList']:
@@ -121,7 +121,7 @@ def get_availability(train_number, src, dest, date, class1, train_type):
     }
     data = parse.urlencode(data).encode()
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii'), headers=headers)
-    res = url_request.urlopen(req, context=context)
+    res = url_request.urlopen(req, context=context, verify=False)
     d = res.read()
     avail = json.loads(d.decode('utf8'))
     try:
@@ -143,7 +143,7 @@ def check_availability():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/FetchAutoComplete", headers=headers)
-    res = url_request.urlopen(req, context=context)
+    res = url_request.urlopen(req, context=context, verify=False)
     stations = json.loads(res.read().decode('ascii'))
     
     src_long = next(item for item in stations if item.endswith(" " + src))
