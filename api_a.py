@@ -7,9 +7,15 @@ import time
 from PIL import Image
 from io import BytesIO
 import requests
+import ssl
+from urllib.request import urlopen, Request
 
 # Disable SSL certificate verification
 requests.packages.urllib3.disable_warnings()
+# Disable SSL certificate verification
+context = ssl.create_default_context()
+context.check_hostname = False
+context.verify_mode = ssl.CERT_NONE
 
 app = Flask(__name__)
 
@@ -32,7 +38,7 @@ def show_captcha():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/captchaDraw.png?" + str(ts), headers=headers)
-    res = url_request.urlopen(req)
+    res = url_request.urlopen(req, context=context)
     data = res.read()
     cookies = get_cookies(res.headers)
     img = Image.open(BytesIO(data))
@@ -79,7 +85,7 @@ def get_train_details(train_number, src_long, dest_long, src, dest, date):
     }
     data = parse.urlencode(data).encode()
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii'), headers=headers)
-    res = url_request.urlopen(req)
+    res = url_request.urlopen(req, context=context)
     trains = json.loads(res.read().decode('ascii'))
     
     for item in trains['trainBtwnStnsList']:
@@ -115,7 +121,7 @@ def get_availability(train_number, src, dest, date, class1, train_type):
     }
     data = parse.urlencode(data).encode()
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii'), headers=headers)
-    res = url_request.urlopen(req)
+    res = url_request.urlopen(req, context=context)
     d = res.read()
     avail = json.loads(d.decode('utf8'))
     try:
@@ -137,7 +143,7 @@ def check_availability():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/FetchAutoComplete", headers=headers)
-    res = url_request.urlopen(req,verify=False)
+    res = url_request.urlopen(req, context=context)
     stations = json.loads(res.read().decode('ascii'))
     
     src_long = next(item for item in stations if item.endswith(" " + src))
