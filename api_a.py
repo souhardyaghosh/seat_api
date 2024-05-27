@@ -36,6 +36,8 @@ def show_captcha():
     
     # Create a custom SSL context to bypass SSL verification
     context = ssl.create_default_context()
+    context.options |= ssl.OP_NO_SSLv3
+    context.options |= ssl.OP_NO_SSLv2
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
     
@@ -89,8 +91,12 @@ def get_train_details(train_number, src_long, dest_long, src, dest, date):
     url = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii')
     req = url_request.Request(url, headers=headers)
     
-    # Disable SSL certificate verification for urllib.request
-    context = ssl._create_unverified_context()
+    # Create a custom SSL context to bypass SSL verification
+    context = ssl.create_default_context()
+    context.options |= ssl.OP_NO_SSLv3
+    context.options |= ssl.OP_NO_SSLv2
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
     
     with url_request.urlopen(req, context=context) as res:
         trains = json.loads(res.read().decode('ascii'))
@@ -130,8 +136,12 @@ def get_availability(train_number, src, dest, date, class1, train_type):
     url = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii')
     req = url_request.Request(url, headers=headers)
     
-    # Disable SSL certificate verification for urllib.request
-    context = ssl._create_unverified_context()
+    # Create a custom SSL context to bypass SSL verification
+    context = ssl.create_default_context()
+    context.options |= ssl.OP_NO_SSLv3
+    context.options |= ssl.OP_NO_SSLv2
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
     
     with url_request.urlopen(req, context=context) as res:
         d = res.read()
@@ -157,8 +167,12 @@ def check_availability():
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/FetchAutoComplete", headers=headers)
     
-    # Disable SSL certificate verification for urllib.request
-    context = ssl._create_unverified_context()
+    # Create a custom SSL context to bypass SSL verification
+    context = ssl.create_default_context()
+    context.options |= ssl.OP_NO_SSLv3
+    context.options |= ssl.OP_NO_SSLv2
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
     
     with url_request.urlopen(req, context=context) as res:
         stations = json.loads(res.read().decode('ascii'))
