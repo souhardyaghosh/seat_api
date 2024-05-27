@@ -17,12 +17,6 @@ OCR_API_URL = 'https://api.ocr.space/parse/image'
 
 # Disable SSL certificate verification globally
 requests.packages.urllib3.disable_warnings()
-requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
-try:
-    requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
-except AttributeError:
-    # no pyopenssl support used / needed / available
-    pass
 
 def get_cookies(headers):
     headers = str(headers).split("\n")
@@ -40,8 +34,10 @@ def show_captcha():
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/captchaDraw.png?" + str(ts), headers=headers)
     
-    # Disable SSL certificate verification for urllib.request
-    context = ssl._create_unverified_context()
+    # Create a custom SSL context to bypass SSL verification
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
     
     with url_request.urlopen(req, context=context) as res:
         data = res.read()
