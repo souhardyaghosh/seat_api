@@ -15,8 +15,14 @@ app = Flask(__name__)
 OCR_API_KEY = 'K83337641288957'
 OCR_API_URL = 'https://api.ocr.space/parse/image'
 
-# Disable SSL certificate verification
+# Disable SSL certificate verification globally
 requests.packages.urllib3.disable_warnings()
+requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
+try:
+    requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
+except AttributeError:
+    # no pyopenssl support used / needed / available
+    pass
 
 def get_cookies(headers):
     headers = str(headers).split("\n")
@@ -34,10 +40,8 @@ def show_captcha():
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/captchaDraw.png?" + str(ts), headers=headers)
     
-    # Create a custom SSL context
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
+    # Disable SSL certificate verification for urllib.request
+    context = ssl._create_unverified_context()
     
     with url_request.urlopen(req, context=context) as res:
         data = res.read()
@@ -63,7 +67,8 @@ def ocr_space_file(image):
     response = requests.post(
         OCR_API_URL,
         files={"file": ("captcha.png", img_str, "image/png")},
-        data={"apikey": OCR_API_KEY, "language": "eng"}
+        data={"apikey": OCR_API_KEY, "language": "eng"},
+        verify=False  # Disable SSL certificate verification for requests
     )
     return response.json()
 
@@ -88,10 +93,8 @@ def get_train_details(train_number, src_long, dest_long, src, dest, date):
     url = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii')
     req = url_request.Request(url, headers=headers)
     
-    # Create a custom SSL context
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
+    # Disable SSL certificate verification for urllib.request
+    context = ssl._create_unverified_context()
     
     with url_request.urlopen(req, context=context) as res:
         trains = json.loads(res.read().decode('ascii'))
@@ -131,10 +134,8 @@ def get_availability(train_number, src, dest, date, class1, train_type):
     url = "http://www.indianrail.gov.in/enquiry/CommonCaptcha?" + data.decode('ascii')
     req = url_request.Request(url, headers=headers)
     
-    # Create a custom SSL context
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
+    # Disable SSL certificate verification for urllib.request
+    context = ssl._create_unverified_context()
     
     with url_request.urlopen(req, context=context) as res:
         d = res.read()
@@ -160,10 +161,8 @@ def check_availability():
     }
     req = url_request.Request("http://www.indianrail.gov.in/enquiry/FetchAutoComplete", headers=headers)
     
-    # Create a custom SSL context
-    context = ssl.create_default_context()
-    context.check_hostname = False
-    context.verify_mode = ssl.CERT_NONE
+    # Disable SSL certificate verification for urllib.request
+    context = ssl._create_unverified_context()
     
     with url_request.urlopen(req, context=context) as res:
         stations = json.loads(res.read().decode('ascii'))
