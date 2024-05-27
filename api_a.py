@@ -25,10 +25,7 @@ def get_cookies(headers):
 def show_captcha():
     global cookies, answer
     ts = int(time.time() * 1000)
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
-    }
-    req = url_request.Request("http://www.indianrail.gov.in/enquiry/captchaDraw.png?" + str(ts), headers=headers)
+    req = url_request.Request("http://www.indianrail.gov.in/enquiry/captchaDraw.png?" + str(ts))
     res = url_request.urlopen(req)
     data = res.read()
     cookies = get_cookies(res.headers)
@@ -61,8 +58,7 @@ def get_train_details(train_number, src_long, dest_long, src, dest, date):
     global cookies, answer
     ts = int(time.time() * 1000)
     headers = {
-        "Cookie": cookies,
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
+        "Cookie": cookies
     }
     data = {
         "inputCaptcha": answer,
@@ -94,8 +90,7 @@ def get_availability(train_number, src, dest, date, class1, train_type):
     global cookies, answer
     ts = int(time.time() * 1000)
     headers = {
-        "Cookie": cookies,
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
+        "Cookie": cookies
     }
     data = {
         "inputCaptcha": answer,
@@ -130,10 +125,7 @@ def check_availability():
     date = datetime.strptime(date_str, '%d-%m-%Y')
     
     # Fetch stations
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
-    }
-    req = url_request.Request("http://www.indianrail.gov.in/enquiry/FetchAutoComplete", headers=headers)
+    req = url_request.Request("http://www.indianrail.gov.in/enquiry/FetchAutoComplete")
     res = url_request.urlopen(req)
     stations = json.loads(res.read().decode('ascii'))
     
